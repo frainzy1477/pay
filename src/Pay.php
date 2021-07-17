@@ -15,6 +15,8 @@ use Yansongda\Pay\Exception\ContainerDependencyException;
 use Yansongda\Pay\Exception\ContainerException;
 use Yansongda\Pay\Exception\ContainerNotFoundException;
 use Yansongda\Pay\Exception\ServiceNotFoundException;
+use Yansongda\Pay\Provider\Alipay;
+use Yansongda\Pay\Provider\Wechat;
 use Yansongda\Pay\Service\AlipayServiceProvider;
 use Yansongda\Pay\Service\ConfigServiceProvider;
 use Yansongda\Pay\Service\EventServiceProvider;
@@ -22,6 +24,10 @@ use Yansongda\Pay\Service\HttpServiceProvider;
 use Yansongda\Pay\Service\LoggerServiceProvider;
 use Yansongda\Pay\Service\WechatServiceProvider;
 
+/**
+ * @method static Alipay alipay(array $config = [])
+ * @method static Wechat wechat(array $config = [])
+ */
 class Pay
 {
     /**
@@ -58,14 +64,12 @@ class Pay
     ];
 
     /**
-     * @var \DI\Container
+     * @var \DI\Container|null
      */
     private static $container = null;
 
     /**
      * Bootstrap.
-     *
-     * @author yansongda <me@yansongda.cn>
      *
      * @throws \Yansongda\Pay\Exception\ContainerDependencyException
      * @throws \Yansongda\Pay\Exception\ContainerException
@@ -80,8 +84,6 @@ class Pay
     /**
      * __callStatic.
      *
-     * @author yansongda <me@yansongda.cn>
-     *
      * @throws \Yansongda\Pay\Exception\ContainerDependencyException
      * @throws \Yansongda\Pay\Exception\ContainerException
      * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
@@ -90,7 +92,7 @@ class Pay
      */
     public static function __callStatic(string $service, array $config)
     {
-        if (!empty($config) && !self::hasContainer()) {
+        if (!empty($config)) {
             self::config(...$config);
         }
 
@@ -100,15 +102,13 @@ class Pay
     /**
      * 初始化容器、配置等信息.
      *
-     * @author yansongda <me@yansongda.cn>
-     *
      * @throws \Yansongda\Pay\Exception\ContainerDependencyException
      * @throws \Yansongda\Pay\Exception\ContainerException
      * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
      */
     public static function config(array $config = []): Pay
     {
-        if (empty($config) && self::hasContainer()) {
+        if (self::hasContainer() && !($config['_force'] ?? false)) {
             return self::get(Pay::class);
         }
 
@@ -117,8 +117,6 @@ class Pay
 
     /**
      * 定义.
-     *
-     * @author yansongda <me@yansongda.cn>
      *
      * @param mixed $value
      *
@@ -182,8 +180,6 @@ class Pay
     /**
      * getContainer.
      *
-     * @author yansongda <me@yansongda.cn>
-     *
      * @throws \Yansongda\Pay\Exception\ContainerNotFoundException
      */
     public static function getContainer(): Container
@@ -197,8 +193,6 @@ class Pay
 
     /**
      * has Container.
-     *
-     * @author yansongda <me@yansongda.cn>
      */
     public static function hasContainer(): bool
     {
@@ -207,8 +201,6 @@ class Pay
 
     /**
      * clear.
-     *
-     * @author yansongda <me@yansongda.cn>
      */
     public static function clear(): void
     {
@@ -217,8 +209,6 @@ class Pay
 
     /**
      * 注册服务.
-     *
-     * @author yansongda <me@yansongda.cn>
      *
      * @throws \Yansongda\Pay\Exception\ContainerDependencyException
      * @throws \Yansongda\Pay\Exception\ContainerException
@@ -235,8 +225,6 @@ class Pay
 
     /**
      * initContainer.
-     *
-     * @author yansongda <me@yansongda.cn>
      *
      * @throws \Yansongda\Pay\Exception\ContainerException
      */
@@ -259,8 +247,6 @@ class Pay
 
     /**
      * register services.
-     *
-     * @author yansongda <me@yansongda.cn>
      *
      * @throws \Yansongda\Pay\Exception\ContainerDependencyException
      * @throws \Yansongda\Pay\Exception\ContainerException

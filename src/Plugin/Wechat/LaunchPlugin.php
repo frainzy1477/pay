@@ -14,17 +14,22 @@ use Yansongda\Supports\Collection;
 class LaunchPlugin implements PluginInterface
 {
     /**
+     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws \Yansongda\Pay\Exception\ContainerException
+     * @throws \Yansongda\Pay\Exception\InvalidConfigException
      * @throws \Yansongda\Pay\Exception\InvalidResponseException
+     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::info('[wechat][LaunchPlugin] 插件开始装载', ['rocket' => $rocket]);
-
         /* @var Rocket $rocket */
         $rocket = $next($rocket);
 
+        Logger::info('[wechat][LaunchPlugin] 插件开始装载', ['rocket' => $rocket]);
+
         if (should_do_http_request($rocket)) {
-            $this->verifySign($rocket);
+            verify_wechat_sign($rocket->getDestinationOrigin(), $rocket->getParams());
 
             $rocket->setDestination($this->formatResponse($rocket));
         }
@@ -34,11 +39,6 @@ class LaunchPlugin implements PluginInterface
         return $rocket;
     }
 
-    protected function verifySign(Rocket $rocket): void
-    {
-        // todo
-    }
-
     /**
      * @throws \Yansongda\Pay\Exception\InvalidResponseException
      */
@@ -46,7 +46,9 @@ class LaunchPlugin implements PluginInterface
     {
         $response = $rocket->getDestination();
 
-        if (isset($response['code'])) {
+        $code = $response->get('code');
+
+        if (!is_null($code) && 0 != $code) {
             throw new InvalidResponseException(InvalidResponseException::INVALID_RESPONSE_CODE);
         }
 

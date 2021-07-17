@@ -2,13 +2,14 @@
 
 namespace Yansongda\Pay\Tests\Plugin;
 
-use PHPUnit\Framework\TestCase;
 use Yansongda\Pay\Contract\ParserInterface;
 use Yansongda\Pay\Exception\InvalidConfigException;
 use Yansongda\Pay\Parser\NoHttpRequestParser;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Plugin\ParserPlugin;
 use Yansongda\Pay\Rocket;
+use Yansongda\Pay\Tests\Stubs\FooPackerStub;
+use Yansongda\Pay\Tests\TestCase;
 
 class ParserPluginTest extends TestCase
 {
@@ -51,8 +52,4 @@ class ParserPluginTest extends TestCase
 
         self::assertSame($rocket, $result);
     }
-}
-
-class FooPackerStub
-{
 }

@@ -4,7 +4,6 @@ namespace Yansongda\Pay\Tests;
 
 use DI\Container;
 use GuzzleHttp\Client;
-use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Yansongda\Pay\Contract\ConfigInterface;
@@ -15,14 +14,18 @@ use Yansongda\Pay\Exception\ContainerException;
 use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Tests\Stubs\FooServiceProviderStub;
-use Yansongda\Supports\Collection;
 use Yansongda\Supports\Config;
 use Yansongda\Supports\Logger;
 use Yansongda\Supports\Pipeline;
 
 class PayTest extends TestCase
 {
-    protected function tearDown (): void
+    protected function setUp(): void
+    {
+        Pay::clear();
+    }
+
+    protected function tearDown(): void
     {
         Pay::clear();
     }
@@ -30,7 +33,13 @@ class PayTest extends TestCase
     public function testConfig()
     {
         $result = Pay::config(['name' => 'yansongda']);
-        static::assertInstanceOf(Pay::class, $result);
+        self::assertInstanceOf(Pay::class, $result);
+        self::assertEquals('yansongda', Pay::get(ConfigInterface::class)->get('name'));
+
+        // force
+        $result1 = Pay::config(['name' => 'yansongda1', '_force' => true]);
+        self::assertInstanceOf(Pay::class, $result1);
+        self::assertEquals('yansongda1', Pay::get(ConfigInterface::class)->get('name'));
     }
 
     public function testSetAndGet()

@@ -19,6 +19,15 @@ use Yansongda\Pay\Plugin\ParserPlugin;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Str;
 
+/**
+ * @method ResponseInterface app(array $order)      APP 支付
+ * @method Collection        pos(array $order)      刷卡支付
+ * @method Collection        scan(array $order)     扫码支付
+ * @method Collection        transfer(array $order) 帐户转账
+ * @method ResponseInterface wap(array $order)      手机网站支付
+ * @method ResponseInterface web(array $order)      电脑支付
+ * @method Collection        mini(array $order)     小程序支付
+ */
 class Alipay extends AbstractProvider
 {
     public const URL = [
@@ -33,7 +42,7 @@ class Alipay extends AbstractProvider
      * @throws \Yansongda\Pay\Exception\InvalidParamsException
      * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
      *
-     * @return \Yansongda\Supports\Collection|\Psr\Http\Message\ResponseInterface
+     * @return \Yansongda\Supports\Collection|\Psr\Http\Message\MessageInterface
      */
     public function __call(string $shortcut, array $params)
     {
@@ -55,7 +64,7 @@ class Alipay extends AbstractProvider
     {
         $order = is_array($order) ? $order : ['out_trade_no' => $order];
 
-        Event::dispatch(new Event\MethodCalled(__METHOD__, $order, null));
+        Event::dispatch(new Event\MethodCalled('wechat', __METHOD__, $order, null));
 
         return $this->__call('query', [$order]);
     }
@@ -72,7 +81,7 @@ class Alipay extends AbstractProvider
     {
         $order = is_array($order) ? $order : ['out_trade_no' => $order];
 
-        Event::dispatch(new Event\MethodCalled(__METHOD__, $order, null));
+        Event::dispatch(new Event\MethodCalled('wechat', __METHOD__, $order, null));
 
         return $this->__call('cancel', [$order]);
     }
@@ -89,7 +98,7 @@ class Alipay extends AbstractProvider
     {
         $order = is_array($order) ? $order : ['out_trade_no' => $order];
 
-        Event::dispatch(new Event\MethodCalled(__METHOD__, $order, null));
+        Event::dispatch(new Event\MethodCalled('wechat', __METHOD__, $order, null));
 
         return $this->__call('close', [$order]);
     }
@@ -102,7 +111,7 @@ class Alipay extends AbstractProvider
      */
     public function refund(array $order): Collection
     {
-        Event::dispatch(new Event\MethodCalled(__METHOD__, $order, null));
+        Event::dispatch(new Event\MethodCalled('wechat', __METHOD__, $order, null));
 
         return $this->__call('refund', [$order]);
     }
@@ -115,14 +124,14 @@ class Alipay extends AbstractProvider
      * @throws \Yansongda\Pay\Exception\InvalidParamsException
      * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
      */
-    public function verify($contents = null, ?array $params = null): Collection
+    public function callback($contents = null, ?array $params = null): Collection
     {
-        Event::dispatch(new Event\RequestReceived($contents, $params, null));
+        Event::dispatch(new Event\CallbackReceived('alipay', $contents, $params, null));
 
-        $response = $this->getCallbackParams($contents);
+        $request = $this->getCallbackParams($contents);
 
         return $this->pay(
-            [CallbackPlugin::class], $response->merge($params)->all()
+            [CallbackPlugin::class], $request->merge($params)->all()
         );
     }
 

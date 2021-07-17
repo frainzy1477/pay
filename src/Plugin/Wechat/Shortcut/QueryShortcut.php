@@ -6,6 +6,7 @@ namespace Yansongda\Pay\Plugin\Wechat\Shortcut;
 
 use Yansongda\Pay\Contract\ShortcutInterface;
 use Yansongda\Pay\Exception\InvalidParamsException;
+use Yansongda\Pay\Plugin\Wechat\Pay\Common\FindRefundPlugin;
 use Yansongda\Pay\Plugin\Wechat\Pay\Common\QueryPlugin;
 
 class QueryShortcut implements ShortcutInterface
@@ -25,13 +26,20 @@ class QueryShortcut implements ShortcutInterface
             return $this->{$typeMethod}();
         }
 
-        throw new InvalidParamsException(InvalidParamsException::QUERY_TYPE_ERROR, "Query type [$typeMethod] not supported");
+        throw new InvalidParamsException(InvalidParamsException::SHORTCUT_QUERY_TYPE_ERROR, "Query type [$typeMethod] not supported");
     }
 
     protected function defaultPlugins(): array
     {
         return [
             QueryPlugin::class,
+        ];
+    }
+
+    protected function refundPlugins(): array
+    {
+        return [
+            FindRefundPlugin::class,
         ];
     }
 
